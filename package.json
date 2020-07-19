@@ -30,8 +30,6 @@
     "typescript": "~3.7.2"
   },
   "scripts": {
-    "start": "craco start",
-    "build": "craco build",
     "test": "craco test",
     "devkit": "ts-node --skip-project -O {\\\"esModuleInterop\\\":true} tool/devkit.ts"
   },
