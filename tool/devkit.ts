@@ -18,8 +18,7 @@ const loadConfig = (state: IState) => {
     return;
   }
 
-  require("ts-node/register");
-  // @ts-ignore
+  // require("ts-node/register");
   const config = require(configPath);
 
   const envs = mapKeys(config.ENVS, (key) => key.toLowerCase());
@@ -82,7 +81,6 @@ const devkit = (cwd = process.cwd()) => {
       loadConfig(state);
 
       // console.log(actions[action], state);
-
       exec(actions[action], state);
     },
   };
