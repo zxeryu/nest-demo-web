@@ -4,6 +4,7 @@ import { map } from "lodash";
 import { NavLink } from "react-router-dom";
 import { Layout } from "antd";
 import { EachMenus } from "../component/menu/EachMenus";
+import { select } from "../core/style";
 const { Content, Sider } = Layout;
 
 const HeaderHeight = "3em";
@@ -11,7 +12,8 @@ const HeaderHeight = "3em";
 export const MainHeader = ({ route }: { route: IRouteMeta }) => {
   return (
     <header>
-      <div css={{ height: HeaderHeight }}>
+      <div css={select().height(HeaderHeight).display("flex").alignItems("center")}>
+        <span css={select().margin("0 2em")}>nest-demo-web</span>
         {map(route.children, (sub) => {
           return (
             <NavLink key={sub.path} to={sub.fullPath}>
