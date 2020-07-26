@@ -16,6 +16,7 @@ export interface ActionType<T> {
   // reloadAndRest: () => void;
   // fetchMore: () => void;
   // reset: () => void;
+  //selected
   clearSelected: () => void;
   getSelected: () => ISelectedObjs<T>;
   setSelected: (_: ISelectedObjs<T>) => void;
@@ -26,6 +27,8 @@ export interface IOTable<T> {
   actionRef?: React.MutableRefObject<ActionType<T> | undefined> | ((actionRef: ActionType<T>) => void);
   toolBarRender?: IToolBarProps<T>["toolBarRender"];
   toolBarOptions?: IToolBarProps<T>["options"];
+  pageTotal?: number;
+  onPageChange?: (page: number, pageSize: number) => void;
 }
 
 const TableComponent = <RecordType extends {}>({
@@ -34,15 +37,32 @@ const TableComponent = <RecordType extends {}>({
   actionRef,
   toolBarRender,
   toolBarOptions,
+  pagination,
+  pageTotal = 0,
+  onPageChange,
+  ...otherProps
 }: Omit<TableProps<RecordType>, "columns"> & IOTable<RecordType>) => {
+  //columns
   const columns = useOTableColumns();
-  console.log("@@@@@@@@@@@@@@@@@@@");
   //selectRows
   const [selectedRows, setSelectedRows] = useState<ISelectedObjs<RecordType>>({
     keys: [],
     rows: [],
   });
-  //columns
+  //pagination
+  const [pageInfo, setPageInfo] = useState<{
+    page: number;
+    pageSize: number;
+    pageSizeOptions: string[];
+  }>({
+    page: get(pagination, "defaultCurrent", 1),
+    pageSize: get(pagination, "defaultPageSize", 10),
+    pageSizeOptions: get(pagination, "pageSizeOptions", ["10", "20", "30", "50"]),
+  });
+  //only once
+  useEffect(() => {
+    onPageChange && onPageChange(pageInfo.page, pageInfo.pageSize);
+  }, [pageInfo]);
 
   //actionRef
   useEffect(() => {
@@ -68,6 +88,7 @@ const TableComponent = <RecordType extends {}>({
         <ToolBar selectObjs={selectedRows} toolBarRender={toolBarRender} options={toolBarOptions} />
       )}
       <Table
+        {...otherProps}
         columns={filter(columns, (item) => get(item, "showState", true) as true)}
         dataSource={dataSource}
         rowSelection={
@@ -80,6 +101,27 @@ const TableComponent = <RecordType extends {}>({
                 },
               }
             : undefined
+        }
+        pagination={
+          pagination || onPageChange
+            ? {
+                showSizeChanger: true,
+                pageSizeOptions: pageInfo.pageSizeOptions,
+                total: pageTotal,
+                showTotal: (all, range) => {
+                  return `第${range[0]}-${range[1]}条 共${all}条`;
+                },
+                ...omit(pagination || {}, "onChange", "current", "pageSize", "defaultCurrent", "defaultPageSize"),
+                current: pageInfo.page,
+                pageSize: pageInfo.pageSize,
+                onShowSizeChange: (current: number, size: number) => {
+                  setPageInfo((prevState) => ({ ...prevState, page: current, pageSize: size }));
+                },
+                onChange: (page: number, newPageSize?: number) => {
+                  setPageInfo((prevState) => ({ ...prevState, page, pageSize: newPageSize || prevState.pageSize }));
+                },
+              }
+            : false
         }
       />
     </div>

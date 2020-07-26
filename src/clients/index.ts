@@ -6,13 +6,22 @@ export interface IUser {
   age: string;
 }
 
-export const users = createRequestActor<{ name: string }, IUser[]>("users", ({ name: pName }) => {
-  return {
-    method: "GET",
-    // url: "http://localhost:8080/users",
-    url: "http://192.168.200.37:8080/users",
-    query: {
-      name: pName,
-    },
-  };
-});
+export interface IResp {
+  data: IUser[];
+  total: number;
+}
+
+export const users = createRequestActor<{ page: number; pageSize: number }, IResp>(
+  "users",
+  ({ page: pPage, pageSize: pPageSize }) => {
+    return {
+      method: "GET",
+      // url: "http://localhost:8080/users",
+      url: "http://192.168.200.37:8080/users",
+      query: {
+        page: pPage,
+        pageSize: pPageSize,
+      },
+    };
+  },
+);

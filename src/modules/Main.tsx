@@ -39,7 +39,9 @@ export const MainAdmin = ({ route }: { route: RouteMeta }) => {
       </Sider>
       <Layout>
         <Content>
-          <SwitchRoutes route={route} />
+          <div css={{ height: `calc(100vh - ${HeaderHeight})`, overflowY: "auto" }}>
+            <SwitchRoutes route={route} />
+          </div>
         </Content>
       </Layout>
     </Layout>
