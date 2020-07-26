@@ -4,12 +4,6 @@ import { Divider, Tooltip, Popover, Checkbox, Row, Col } from "antd";
 import { useOTableContext } from "./ctx";
 import { map, set, get, filter, size } from "lodash";
 
-export interface IToolBarProps<T> {
-  headerTitle?: string;
-  selectObjs?: ISelectedObjs<T>;
-  toolBarRender?: (_?: ISelectedObjs<T>) => React.ReactNode;
-}
-
 const ColumnSetting = () => {
   const { columns, updateColumns } = useOTableContext();
   const setAll = useCallback(
@@ -51,9 +45,8 @@ const ColumnSetting = () => {
           <Row>
             {map(columns, (item, idx) => {
               return (
-                <Col span={12}>
+                <Col key={idx} span={12}>
                   <Checkbox
-                    key={idx}
                     checked={get(item, "showState", true)}
                     onChange={(e) => {
                       //reset columns
@@ -82,8 +75,23 @@ const ColumnSetting = () => {
   );
 };
 
-export const ToolBar = <T extends {}>({ headerTitle, selectObjs, toolBarRender }: IToolBarProps<T>) => {
+export interface IToolBarProps<T> {
+  headerTitle?: string;
+  selectObjs?: ISelectedObjs<T>;
+  toolBarRender?: (_?: ISelectedObjs<T>) => React.ReactNode;
+  options?: {
+    columnSetting: boolean;
+  };
+}
+
+export const ToolBar = <T extends {}>({
+  headerTitle,
+  selectObjs,
+  toolBarRender,
+  options = { columnSetting: true },
+}: IToolBarProps<T>) => {
   const optionBar = toolBarRender ? toolBarRender(selectObjs) : null;
+  const { columnSetting } = options;
 
   return (
     <div
@@ -97,7 +105,7 @@ export const ToolBar = <T extends {}>({ headerTitle, selectObjs, toolBarRender }
       <div>
         {optionBar}
         <Divider type="vertical" />
-        <ColumnSetting />
+        {columnSetting && <ColumnSetting />}
       </div>
     </div>
   );

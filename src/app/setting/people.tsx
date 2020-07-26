@@ -32,6 +32,7 @@ const Users = () => {
         columns={columns}
         dataSource={list}
         rowSelection={{}}
+        toolBarOptions={{ columnSetting: true }}
         toolBarRender={(selectedObjs) => (
           <>
             {size(selectedObjs?.rows) > 0 && (

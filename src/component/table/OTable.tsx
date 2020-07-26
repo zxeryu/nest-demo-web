@@ -25,6 +25,7 @@ export interface IOTable<T> {
   //use OTable methods by ref
   actionRef?: React.MutableRefObject<ActionType<T> | undefined> | ((actionRef: ActionType<T>) => void);
   toolBarRender?: IToolBarProps<T>["toolBarRender"];
+  toolBarOptions?: IToolBarProps<T>["options"];
 }
 
 const TableComponent = <RecordType extends {}>({
@@ -32,7 +33,8 @@ const TableComponent = <RecordType extends {}>({
   rowSelection,
   actionRef,
   toolBarRender,
-}: Omit<TableProps<RecordType>, ""> & IOTable<RecordType>) => {
+  toolBarOptions,
+}: Omit<TableProps<RecordType>, "columns"> & IOTable<RecordType>) => {
   const columns = useOTableColumns();
   console.log("@@@@@@@@@@@@@@@@@@@");
   //selectRows
@@ -62,7 +64,9 @@ const TableComponent = <RecordType extends {}>({
   }, [selectedRows]);
   return (
     <div>
-      <ToolBar selectObjs={selectedRows} toolBarRender={toolBarRender} />
+      {(toolBarRender || toolBarOptions) && (
+        <ToolBar selectObjs={selectedRows} toolBarRender={toolBarRender} options={toolBarOptions} />
+      )}
       <Table
         columns={filter(columns, (item) => get(item, "showState", true) as true)}
         dataSource={dataSource}
