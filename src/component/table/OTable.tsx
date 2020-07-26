@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { TableProps } from "antd/es/table";
-import { omit, map, get, filter } from "lodash";
+import { omit, map, get, filter, reduce } from "lodash";
 import { IToolBarProps, ToolBar } from "./ToolBar";
 import { OTableContextProvider, useOTableColumns } from "./ctx";
 import { Table } from "antd";
@@ -135,9 +135,20 @@ export const OTable = <RecordType extends {}>({
   const [oColumns, updateOColumns] = useState<ColumnType<RecordType>[]>([]);
 
   useEffect(() => {
+    const lastState = reduce(
+      oColumns,
+      (pairs, item) => ({
+        ...pairs,
+        [`${item?.dataIndex}`]: get(item, "showState", true),
+      }),
+      {},
+    );
     updateOColumns(
       map(columns, (item) => {
-        const showState = get(item, "showState", true);
+        let showState = get(lastState, get(item, "dataIndex"), undefined);
+        if (showState === undefined) {
+          showState = get(item, "showState", true);
+        }
         return { ...item, showState };
       }),
     );
