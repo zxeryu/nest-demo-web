@@ -2,8 +2,9 @@ import React, { useMemo, useRef } from "react";
 import { useTempDataOfRequest } from "../../core/request";
 import { users, IUser } from "../../clients";
 import { useObservable } from "../../core/store";
-import { ActionType, OTable, Button } from "../../component";
-import { map } from "lodash";
+import { Button } from "antd";
+import { ActionType, OTable } from "../../component/table";
+import { map, size } from "lodash";
 
 const Users = () => {
   const actionRef = useRef<ActionType<IUser> | undefined>();
@@ -26,31 +27,43 @@ const Users = () => {
 
   return (
     <div>
-      <Button
-        onClick={() => {
-          console.log(actionRef.current?.getSelected());
-        }}>
-        get
-      </Button>
-      <Button
-        onClick={() => {
-          actionRef.current?.clearSelected();
-        }}>
-        clear
-      </Button>
-      <Button
-        onClick={() => {
-          if (list) {
-            actionRef.current?.setSelected({ keys: [list[0].key], rows: [list[0]] });
-          }
-        }}>
-        set
-      </Button>
       <OTable<IUser>
         actionRef={(actionRef1) => (actionRef.current = actionRef1)}
         columns={columns}
         dataSource={list}
         rowSelection={{}}
+        toolBarRender={(selectedObjs) => (
+          <>
+            {size(selectedObjs?.rows) > 0 && (
+              <Button
+                onClick={() => {
+                  console.log(selectedObjs);
+                }}>
+                批量删除
+              </Button>
+            )}
+            <Button
+              onClick={() => {
+                console.log(actionRef.current?.getSelected());
+              }}>
+              get
+            </Button>
+            <Button
+              onClick={() => {
+                actionRef.current?.clearSelected();
+              }}>
+              clear
+            </Button>
+            <Button
+              onClick={() => {
+                if (list) {
+                  actionRef.current?.setSelected({ keys: [list[0].key], rows: [list[0]] });
+                }
+              }}>
+              set
+            </Button>
+          </>
+        )}
       />
     </div>
   );

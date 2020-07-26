@@ -1,7 +1,10 @@
-import { Table } from "antd";
 import React, { useEffect, useState } from "react";
 import { TableProps } from "antd/es/table";
-import { omit } from "lodash";
+import { omit, map, get, filter } from "lodash";
+import { IToolBarProps, ToolBar } from "./ToolBar";
+import { OTableContextProvider, useOTableColumns } from "./ctx";
+import { Table } from "antd";
+import { ColumnType } from "antd/es/table/interface";
 
 export interface ISelectedObjs<T> {
   keys: React.Key[];
@@ -21,18 +24,24 @@ export interface ActionType<T> {
 export interface IOTable<T> {
   //use OTable methods by ref
   actionRef?: React.MutableRefObject<ActionType<T> | undefined> | ((actionRef: ActionType<T>) => void);
+  toolBarRender?: IToolBarProps<T>["toolBarRender"];
 }
 
-export const OTable = <RecordType extends {}>({
-  columns,
+const TableComponent = <RecordType extends {}>({
   dataSource,
   rowSelection,
   actionRef,
+  toolBarRender,
 }: Omit<TableProps<RecordType>, ""> & IOTable<RecordType>) => {
+  const columns = useOTableColumns();
+  console.log("@@@@@@@@@@@@@@@@@@@");
+  //selectRows
   const [selectedRows, setSelectedRows] = useState<ISelectedObjs<RecordType>>({
     keys: [],
     rows: [],
   });
+  //columns
+
   //actionRef
   useEffect(() => {
     const userAction: ActionType<RecordType> = {
@@ -53,8 +62,9 @@ export const OTable = <RecordType extends {}>({
   }, [selectedRows]);
   return (
     <div>
+      <ToolBar selectObjs={selectedRows} toolBarRender={toolBarRender} />
       <Table
-        columns={columns}
+        columns={filter(columns, (item) => get(item, "showState", true) as true)}
         dataSource={dataSource}
         rowSelection={
           rowSelection
@@ -69,5 +79,27 @@ export const OTable = <RecordType extends {}>({
         }
       />
     </div>
+  );
+};
+
+export const OTable = <RecordType extends {}>({
+  columns,
+  ...otherProps
+}: TableProps<RecordType> & IOTable<RecordType>) => {
+  const [oColumns, updateOColumns] = useState<ColumnType<RecordType>[]>([]);
+
+  useEffect(() => {
+    updateOColumns(
+      map(columns, (item) => {
+        const showState = get(item, "showState", true);
+        return { ...item, showState };
+      }),
+    );
+  }, [columns]);
+
+  return (
+    <OTableContextProvider value={{ columns: oColumns, updateColumns: updateOColumns as any }}>
+      <TableComponent {...otherProps} />
+    </OTableContextProvider>
   );
 };
